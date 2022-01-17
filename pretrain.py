@@ -61,20 +61,8 @@ import torchvision.utils as vutils
 from torch.autograd import Variable
 from torch.autograd import Function
 
-#!pip install https://github.com/ufoym/imbalanced-dataset-sampler/archive/master.zip
-from torchsampler import ImbalancedDatasetSampler
-
 #!pip install timm
 import timm
-
-# Commented out IPython magic to ensure Python compatibility.
-# if not os.path.exists('./fastText'):
-#     !git clone https://github.com/facebookresearch/fastText.git
-# #     %cd fastText
-#     !pip install .
-# #     %cd ..
-import fasttext
-import fasttext.util
 
 ########################################################################
 """# Fix Seeds"""
@@ -108,7 +96,7 @@ cfg = {
     'N_CLS': 1000,
 
     # the batch-size
-    'BATCH_SZ': 32,
+    'BATCH_SZ': 16,
     
     # the number of epochs during training
     'N_EPOCHS': 10,
@@ -185,51 +173,33 @@ cfg = {
     ]),
 }
 
-########################################################################
-"""# Prepare Label2Name & Word Embeddings"""
-########################################################################
-label2name_dict = dict()
-with open(cfg['LABEL2NAME_PATH'], 'r') as f:
-    for line in f.read().splitlines():
-        num_lbl, fcr, txt_lbl = line.strip().split(' ')
-        label2name_dict[int(num_lbl)] = {'fcr': fcr, 'name': txt_lbl}
+IMG_SIZE = 224
+rotate_rate = 30
+center_crop = 400
+crop_size = 256
 
+train_tfm = transforms.Compose([
+    # Resize the image into a fixed shape (height = width = 128)
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(rotate_rate),
+    transforms.CenterCrop((center_crop, center_crop)),
+    transforms.RandomCrop(crop_size),
+    transforms.ColorJitter(brightness=(0.8, 1.6),contrast=(0.8, 1.6),saturation=0.22),
+    #transforms.RandomAffine(5, translate=(0.13, 0.13), scale=(0.74, 1.32), fillcolor=(255, 255, 255), interpolation=transforms.functional.InterpolationMode.BICUBIC),
+           
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
 
-if not os.path.exists('./cc.zh.300.bin'):
-    fasttext.util.download_model('zh', if_exists='ignore')
-ft = fasttext.load_model('cc.zh.300.bin')
+    # ToTensor() should be the last one of the transforms.
+    transforms.ToTensor(),
+    #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
-def _calc_cos_sim(vec_1, vec_2, eps=1e-25):
-    return (np.dot(vec_1, vec_2) + eps) / ((np.linalg.norm(vec_1) * np.linalg.norm(vec_2)) + eps)
-
-def _calc_words_sim(word_1, word_2):
-    sim_12 = np.mean([np.max([_calc_cos_sim(ft[ch_1], ft[ch_2]) for ch_2 in word_2]) for ch_1 in word_1])
-    sim_21 = np.mean([np.max([_calc_cos_sim(ft[ch_1], ft[ch_2]) for ch_1 in word_1]) for ch_2 in word_2])
-    weighting_ratio = len(word_1) / (len(word_1) + len(word_2))
-    sim = weighting_ratio * sim_12 + (1. - weighting_ratio) * sim_21
-    return sim
-
-# give it a try
-for num_lbl_1 in range(cfg['N_CLS']):
-    name_1 = label2name_dict[num_lbl_1]['name']
-    if '飯' in name_1:
-    # if '蝦' in name_1:
-    # if '湯' in name_1:
-        calculated = []
-        for num_lbl_2 in range(cfg['N_CLS']):
-            name_2 = label2name_dict[num_lbl_2]['name']
-            sim = _calc_words_sim(name_1, name_2)
-            calculated.append((sim, name_1, name_2, num_lbl_1, num_lbl_2))
-        
-        calculated = sorted(calculated, key=lambda x: x[0])
-        buxiang, xiang = [], []
-        for sim, name_1, name_2, _num_lbl_1, _num_lbl_2 in calculated:
-            # print(f'| {name_1}[{_num_lbl_1}] | {name_2}[{_num_lbl_2}] | {sim:.4f} |')
-            if sim < .3:
-                buxiang.append(_num_lbl_2)
-            if sim > .8:
-                xiang.append(_num_lbl_2)
-        break
+# We don't need augmentations in testing and validation.
+# All we need here is to resize the PIL image and transform it into Tensor.
+test_tfm = transforms.Compose([
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.ToTensor(),
+])
 
 ########################################################################
 """# Dataset and DataLoader""" # contains 1.ImbalancedDatasetSampler
@@ -280,15 +250,16 @@ class FoodDataset(Dataset):
     def __len__(self):
         return self.__len
 
+batch_size = 16 # from 128 to 512
 # the data-loader for training
-tr_dataset = FoodDataset(tfm=cfg['TR_TFMS'], split='train')
-tr_loader = DataLoader(tr_dataset, batch_size=cfg['BATCH_SZ'], sampler=ImbalancedDatasetSampler(tr_dataset), num_workers=0, pin_memory=True)
+tr_dataset = FoodDataset(tfm=train_tfm, split='train')
+tr_loader = DataLoader(tr_dataset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory=True)
 # for validation
-vl_dataset = FoodDataset(tfm=cfg['VL_AND_TE_TFMS'], split='val')
-vl_loader = DataLoader(vl_dataset, batch_size=cfg['BATCH_SZ'], shuffle=False, num_workers=0, pin_memory=True)
+vl_dataset = FoodDataset(tfm=test_tfm, split='val')
+vl_loader = DataLoader(vl_dataset, batch_size=batch_size, shuffle=False, num_workers=0, pin_memory=True)
 # for testing
-te_dataset = FoodDataset(tfm=cfg['VL_AND_TE_TFMS'], split='test')
-te_loader = DataLoader(te_dataset, batch_size=cfg['BATCH_SZ'], shuffle=False, num_workers=0, pin_memory=True)
+te_dataset = FoodDataset(tfm=test_tfm, split='test')
+te_loader = DataLoader(te_dataset, batch_size=batch_size, shuffle=False, num_workers=0, pin_memory=True)
 
 dataiter = iter(tr_loader)
 images, labels = dataiter.next()
@@ -300,14 +271,6 @@ plt.figure(figsize=(20,20))
 plt.imshow(grid_img.permute(1, 2, 0))
 plt.show()
 
-label_file = open('./food_data/label2name.txt')
-label_mapping = [line.split(' ')[1] for line in label_file.readlines()]
-
-images_per_class = []
-for cls_idx in range(1000):
-    cls_idx = str(cls_idx)
-    num_images = len(os.listdir(os.path.join('./food_data/train', cls_idx)))
-    images_per_class.append(num_images)
 
 ########################################################################
 """# Build Model""" #  contains 2.ViT-pretrained-weight
@@ -315,48 +278,11 @@ for cls_idx in range(1000):
 model = timm.create_model(
     'vit_base_patch16_224',
     pretrained=True,
-    img_size=224,
+    img_size=IMG_SIZE,
     num_classes=cfg['N_CLS'],
 ).to(cfg['DEVICE'])
 
 print(model)
-
-########################################################################
-"""### Load Pretrained Weight""" # ABLATION: Load SSL here!
-########################################################################
-pretrain_path = "./pretrain/model_best.pt"
-state = torch.load(pretrain_path)
-model.load_state_dict(state['state_dict'])
-
-# freeze layers except classifier layer
-# for param in model.parameters():
-#     param.requires_grad = False
-# for param in model.head.parameters():
-#     param.requires_grad = True
-# model.head = nn.Sequential(
-#     nn.Linear(768, 1000)
-# )
-
-model = model.to(cfg['DEVICE'])
-
-
-########################################################################
-"""### fasttext Loss"""
-########################################################################
-def _obtain_text_label_loss_term(gts):
-    batch_sz = gts.shape[0]
-
-    former_gts = gts[:batch_sz // 2]
-    latter_gts = gts[batch_sz // 2:][:len(former_gts)]
-    
-    losses = [
-        _calc_words_sim(
-            label2name_dict[gt_1.item() if hasattr(gt_1, 'item') else gt_1]['name'],
-            label2name_dict[gt_2.item() if hasattr(gt_2, 'item') else gt_2]['name'],
-        )
-        for gt_1, gt_2 in zip(former_gts, latter_gts) if gt_1 != gt_2
-    ]
-    return np.mean(losses)
 
 ########################################################################
 """### Label Smoothing Loss"""
@@ -389,101 +315,6 @@ class LabelSmoothingLoss(torch.nn.Module):
             log_preds, target, reduction=self.reduction, weight=self.weight
         )
         return self.linear_combination(loss / n, nll)
-
-########################################################################
-"""### Pairwise Confusion"""
-########################################################################
-def PairwiseConfusion(features, target):
-    batch_size = features.size(0)
-    if float(batch_size) % 2 != 0:
-        return 0
-    batch_left = features[:int(0.5*batch_size)]
-    batch_right = features[int(0.5*batch_size):]
-
-    target_left = target[:int(0.5*batch_size)]
-    target_right = target[int(0.5*batch_size):]
-
-    target_mask_t = torch.eq(target_left, target_right)
-    target_mask = ~target_mask_t
-    target_mask = target_mask.type(torch.cuda.FloatTensor)
-    number = target_mask.sum()
-    loss  = (torch.norm((batch_left - batch_right).abs(),2, 1) * target_mask).sum() / number
-
-    return loss
-
-###################################################################################################
-"""### Re-Weighting: LDAM
-reference: https://github.com/kaidic/LDAM-DRW/blob/master/cifar_train.py 
-"""
-###################################################################################################
-def focal_loss(input_values, gamma):
-    """Computes the focal loss"""
-    p = torch.exp(-input_values)
-    loss = (1 - p) ** gamma * input_values
-    return loss.mean()
-
-class FocalLoss(nn.Module):
-    def __init__(self, weight=None, gamma=0.):
-        super(FocalLoss, self).__init__()
-        assert gamma >= 0
-        self.gamma = gamma
-        self.weight = weight
-
-    def forward(self, input, target):
-        return focal_loss(F.cross_entropy(input, target, reduction='none', weight=self.weight), self.gamma)
-
-class LDAMLoss(nn.Module):
-    
-    def __init__(self, cls_num_list, max_m=0.5, weight=None, s=30):
-        super(LDAMLoss, self).__init__()
-        m_list = 1.0 / np.sqrt(np.sqrt(cls_num_list))
-        m_list = m_list * (max_m / np.max(m_list))
-        m_list = torch.cuda.FloatTensor(m_list)
-        self.m_list = m_list
-        assert s > 0
-        self.s = s
-
-        self.weight = weight
-
-    def forward(self, x, target):
-        index = torch.zeros_like(x, dtype=torch.uint8)
-        index.scatter_(1, target.data.view(-1, 1), 1)
-        
-        index_float = index.type(torch.cuda.FloatTensor)
-        # print(self.m_list.shape)
-        # print(index_float.shape)
-        batch_m = torch.matmul(self.m_list[None, :], index_float.transpose(0,1))
-        batch_m = batch_m.view((-1, 1))
-        x_m = x - batch_m
-    
-        output = torch.where(index, x_m, x)
-        return F.cross_entropy(self.s*output, target, weight=self.weight)
-
-
-###################################################################################################
-"""### Mix Up augmentation and its loss
-Reference: https://github.com/hongyi-zhang/mixup/blob/master/cifar/utils.py
-"""
-###################################################################################################
-def mixup_data(x, y, alpha=1.0, use_cuda=True):
-
-    '''Compute the mixup data. Return mixed inputs, pairs of targets, and lambda'''
-    if alpha > 0.:
-        lam = np.random.beta(alpha, alpha)
-    else:
-        lam = 1.
-    batch_size = x.size()[0]
-    if use_cuda: # 隨機打亂順序
-        index = torch.randperm(batch_size).cuda()
-    else:
-        index = torch.randperm(batch_size)
-
-    mixed_x = lam * x + (1 - lam) * x[index,:] # w * a + (1-w) * b
-    y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam # 混合型資料, 原始順序，打亂的順序, 權重
-
-def mixup_criterion(y_a, y_b, lam):
-    return lambda criterion, pred: lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b) # 權重*偏左loss + (1-權重)*偏右loss
 
 ###################################################################################################
 """### Learning Rate Scheduler"""
@@ -541,15 +372,15 @@ def count_acc_category(acc_list):
 num_epochs = 12
 save_per_iters = 500
 print_log_per_iters = 100
-output_path = "./checkpoints"
+output_path = "./pretrain" 
 if not os.path.exists(output_path):
     os.makedirs(output_path)
     print("create output_dir: ", output_path)
 
 # ABLATION: switch to CrossEntropyLoss
-#criterion = nn.CrossEntropyLoss().to(cfg['DEVICE']EVICE'])
-smoothing = 0.1
-criterion = LabelSmoothingLoss(smoothing=smoothing).to(cfg['DEVICE'])
+criterion = nn.CrossEntropyLoss().to(cfg['DEVICE'])
+# smoothing = 0.1
+# criterion = LabelSmoothingLoss(smoothing=smoothing).to(cfg['DEVICE'])
 
 origin_lr=1e-5
 weight_decay=1e-6
@@ -638,43 +469,8 @@ for epoch in range(start_epoch, num_epochs):
 
         # compute output
         output = model(images)
-
-        # re-weighting LDAM Loss
-          # 法1
-        # idx = epoch // 160
-        # betas = [0, 0.9999]
-        # effective_num = 1.0 - np.power(betas[idx], cls_num_list)
-        # per_cls_weights = (1.0 - betas[idx]) / np.array(effective_num)
-        # per_cls_weights = per_cls_weights / np.sum(per_cls_weights) * len(cls_num_list)
-        # per_cls_weights = torch.FloatTensor(per_cls_weights).to(device)
-
-          # 法2
-        beta = 0.9999
-        effective_num = 1.0 - np.power(beta, images_per_class)
-        per_cls_weights = (1.0 - beta) / np.array(effective_num)
-        per_cls_weights = per_cls_weights / np.sum(per_cls_weights) * len(images_per_class)
-        per_cls_weights = torch.FloatTensor(per_cls_weights).to(cfg['DEVICE'])
-        criterion_ldam = LDAMLoss(cls_num_list=images_per_class, max_m=0.5, s=30, weight=per_cls_weights).to(cfg['DEVICE'])
-
-        ####################################################################################################
-        ###### LabelSmooth/CELoss + FastText + LDAM (ABLATION: turn on or turn off fasttext and LDAM)
-        ####################################################################################################
-        loss = criterion(output, target) + 1.0 * _obtain_text_label_loss_term(target) + 0.5 * criterion_ldam(output, target)
+        loss = criterion(output, target)
         acc = 100.0 * (output.argmax(dim=-1) == target).float().mean()
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        ####################################################################################################
-        ##### mix up augmentation (這是新的資料了，因此共有兩份資料，原始output以及augmented output) (ABLATION: turn on or turn off mix up)
-        ####################################################################################################
-        inputs, targets_a, targets_b, lam = mixup_data(images, target, alpha=1.0, use_cuda=True)
-        inputs, targets_a, targets_b = Variable(inputs), Variable(targets_a), Variable(targets_b)
-        outputs = model(inputs)
-
-        loss_func = mixup_criterion(targets_a, targets_b, lam)
-        loss = loss_func(criterion, outputs) # 此時似乎沒辦法對rare class(已經mix) 以及 similar class(已經mix) 算loss
 
         optimizer.zero_grad()
         loss.backward()
