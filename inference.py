@@ -39,7 +39,6 @@ fix_seeds(0)
 ##### II. Load args
 ########################################################################
 data_dir, output_dir, model_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-# "./food_data/" "./output_csv/" "./checkpoints/"
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")

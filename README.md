@@ -30,7 +30,9 @@ $2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./o
 
 $3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files, or some unwanted error could possibly be raised!**
 
-**You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!**
+### Be aware
++ You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!
++ Do not be confused with the directories for saving checkpoints during training and the checkpoint directory used to do inference. We use only TWO checkpoints for inferencing, and there might be lots of checkpoints inside the for-training directories as the training goes.
 
     
 # Usage
