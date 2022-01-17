@@ -563,7 +563,7 @@ for epoch in range(start_epoch, num_epochs):
                 if valid_accu > best_valid_accu:
                     best_valid_accu = valid_accu
                     print("Save Best Valid Accu")
-                    model_path = "model_best_3.pt"
+                    model_path = "model_best.pt"
                     torch.save({
                         'epoch': epoch + 1,
                         'iters': iters + 1,
