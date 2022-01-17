@@ -129,20 +129,20 @@ cfg = {
     },
     
     # the directory of all data, including training, validation, and testing data
-    'DATA_DIR': './data/food_data/',
+    'DATA_DIR': './food_data/',
 
     # the path to label2name.txt
-    'LABEL2NAME_PATH': './data/food_data/label2name.txt',
+    'LABEL2NAME_PATH': './food_data/label2name.txt',
     
     # the filename of the output csv-file
     'OUTPUT_CSV_FILENAME': 'submission.csv',
     
     # the file-paths of all four sample submission csv-files
     'SAMPLE_SUBMISSION_FILEPATHS': {
-        'main': './data/food_data/testcase/sample_submission_main_track.csv',
-        'freq': './data/food_data/testcase/sample_submission_freq_track.csv',
-        'comm': './data/food_data/testcase/sample_submission_comm_track.csv',
-        'rare': './data/food_data/testcase/sample_submission_rare_track.csv',
+        'main': './food_data/testcase/sample_submission_main_track.csv',
+        'freq': './food_data/testcase/sample_submission_freq_track.csv',
+        'comm': './food_data/testcase/sample_submission_comm_track.csv',
+        'rare': './food_data/testcase/sample_submission_rare_track.csv',
     },
     
     # the directory of the saved models
