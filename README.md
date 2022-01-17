@@ -1,10 +1,35 @@
 # DLCV Final Project ( Food-classification-Challenge )
 
 # How to run your code?
-> TODO: Please provide example scripts to run your code. For example, 
-> 1. python3 preprocessing.py <Path to Blood_data>
-> 2. python3 inference.py <Path to the output csv file>
-> ...
+
+### Preparing
+    git clone https://github.com/DLCV-Fall-2021/final-project-challenge-3-tetraphobia.git
+    bash ./get_dataset.sh
+
+### Training
+We will need two different checkpoints to do ensemble when testing. Follow the steps to do training:
+> 1. ***python3 pretrain.py***
+> 2. ***python3 train.py***
+> 3. ***python3 train_2.py*** and take out the checkpoint at 31,500 iteration (It will be named "Iter31500_model.pt") for later inference.
+
+*pretrain.py* and *train.py* are used to generate the first checkpoint, which requires a two-phase training technique; whereas for the second checkpoint, you have only to execute *train_2.py*.
+
+### Inference
+If you want to use our trained checkpoints to do inference, you have to use the following command to obtain them before doing inference:
+
+    bash ./download_checkpoints.sh
+And our trained checkpoints will be donwloaded to the current directory. **You would possibly want to create a new directory and move the downloaded checkpoints into it manually for later inferencing**
+
+Otherwise, after you start training, you could find the saved checkpoints inside "./checkpoints/" for the first to-be-used-in-inference checkpoint & "./checkpoints_2/" for the second one.
+> 1. ***python3 inference.py $1 $2 $3***
+
+$1 = the directory to the whole dataset (e.g.: ./food_data/).
+
+$2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/).
+
+$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files, or some unwanted error could possibly be raised!**
+
+**You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!**
 
     
 # Usage
