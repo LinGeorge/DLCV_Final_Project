@@ -13,7 +13,7 @@ We will need two different checkpoints to do ensemble when testing. Follow the s
 > 2. ***python3 train.py*** and take out the checkpoint at 29,000 iteration (It will be named "Iter29000_m_......_model.pt") for later inference. Notice that there are valid accuracy information in the middle of the model name. Hence you need to make sure the name before you move this checkpoint to the inference folder.
 > 3. ***python3 train_2.py*** and take out the checkpoint at 31,500 iteration (It will be named "Iter31500_model.pt") for later inference.
 
-*pretrain.py* and *train.py* are used to generate the first checkpoint, which requires a two-phase training technique; whereas for the second checkpoint, you have only to execute *train_2.py*.
+*pretrain.py* and *train.py* are used to generate the first checkpoint, which requires a two-phase training technique; whereas for the second checkpoint, you simply have to execute *train_2.py*.
 
 ### Inference
 If you want to use our trained checkpoints to do inference, you have to use the following command to obtain them before doing inference:
