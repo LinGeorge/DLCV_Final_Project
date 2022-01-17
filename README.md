@@ -5,6 +5,7 @@
 ### Preparing
     git clone https://github.com/DLCV-Fall-2021/final-project-challenge-3-tetraphobia.git
     bash ./get_dataset.sh
+    pip install -r requirements.txt
 
 ### Training
 We will need two different checkpoints to do ensemble when testing. Follow the steps to do training:
