@@ -9,7 +9,7 @@
 
 ### Training
 We will need two different checkpoints to do ensemble when testing. Follow the steps to do training:
-> 1. ***python3 pretrain.py*** and take out the checkpoint with best valid accuracy(It will be named "model_best.pt") for later train.py phase.
+> 1. ***python3 pretrain.py*** and take out the checkpoint with best valid accuracy after the whole training phase complete(It will be named "model_best.pt") for later train.py phase.
 > 2. ***python3 train.py*** and take out the checkpoint at 29,000 iteration (It will be named "Iter29000_m_......_model.pt") for later inference. Notice that there are valid accuracy information in the middle of the model name. Hence you need to make sure the name before you move this checkpoint to the inference folder.
 > 3. ***python3 train_2.py*** and take out the checkpoint at 31,500 iteration (It will be named "Iter31500_model.pt") for later inference.
 
