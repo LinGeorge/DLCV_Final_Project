@@ -34,7 +34,7 @@ $1 = the directory to the whole dataset (e.g.: ./food_data/). **Note that this d
 
 $2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/). **Note that this directory must be the folder like (./output_submissions/). The directory must be created in advance otherwise the unwanted error would be raised.**
 
-$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./our_trained_ckpts/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete any unwanted checkpoints and move the wanted checkpoints manually. We do not provide the code to move and/or remove the checkpoints.**
+$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./our_trained_ckpts/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete any unwanted checkpoints or move the wanted checkpoints manually. We do not provide the code to move and/or remove the checkpoints.**
 
 ### Be aware
 + You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!
