@@ -4,6 +4,9 @@
 
 ### Preparing
     git clone https://github.com/DLCV-Fall-2021/final-project-challenge-3-tetraphobia.git
+
+Then move to the directory of this project (e.g., ***cd final-project-challenge-3-tetraphobia***)
+
     bash ./get_dataset.sh
     pip install -r requirements.txt
 
@@ -20,16 +23,18 @@ For the second checkpoint, you simply have to execute *train_2.py*.
 If you want to use our trained checkpoints to do inference, you have to use the following command to obtain them before doing inference:
 
     bash ./download_checkpoints.sh
-And our trained checkpoints will be donwloaded to the current directory. **You would possibly need to create a new directory and move the downloaded checkpoints into it manually for later inferencing**
+And our trained checkpoints will be donwloaded to the directory named *./our_trained_ckpts/*. You would have to pass this in as an argument when executing *inference.py*. See the following steps for more details.
 
-Otherwise, after you start training, you could find the saved checkpoints inside "./checkpoints/" for the first to-be-used-in-inference checkpoint & "./checkpoints_2/" for the second one.
+Otherwise, i.e., you want to do training, after you start training, you could find the saved checkpoints inside "./checkpoints/" for the first to-be-used-in-inference checkpoint & "./checkpoints_2/" for the second one.
+
+Finally, the following command is for doing inference.
 > 1. ***python3 inference.py $1 $2 $3***
 
 $1 = the directory to the whole dataset (e.g.: ./food_data/). **Note that this directory must be the root of the dataset like (./food_data/). Some unwanted error would be raised if the directory is (./food_data/test)!**
 
 $2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/). **Note that this directory must be the folder like (./output_submissions/). The directory must be created in advance otherwise the unwanted error would be raised.**
 
-$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete unwanted checkpoints created by train.py and then move the wanted checkpoints manually. We do not provide the code to move and remove the checkpoints.**
+$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete unwanted checkpoints created by train.py or move the wanted checkpoints manually. We do not provide the code to move and/or remove the checkpoints.**
 
 ### Be aware
 + You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!
