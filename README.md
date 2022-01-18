@@ -27,7 +27,7 @@ Otherwise, after you start training, you could find the saved checkpoints inside
 
 $1 = the directory to the whole dataset (e.g.: ./food_data/). **Note that this directory must be the root of the dataset like (./food_data/). Some unwanted error would be raised if the directory is (./food_data/test)!**
 
-$2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/). **Note that this directory must be the folder of the dataset like (./output_submissions/). The directory must be created in advance otherwise the unwanted error would be raised.**
+$2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/). **Note that this directory must be the folder like (./output_submissions/). The directory must be created in advance otherwise the unwanted error would be raised.**
 
 $3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete unwanted checkpoints created by train.py and then move the wanted checkpoints manually. We do not provide the code to move and remove the checkpoints.**
 
