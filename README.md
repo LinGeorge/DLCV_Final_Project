@@ -9,17 +9,18 @@
 
 ### Training
 We will need two different checkpoints to do ensemble when testing. Follow the steps to do training:
-> 1. ***python3 pretrain.py*** and take out the checkpoint with best valid accuracy after the whole training phase complete(It will be named "model_best.pt") for later train.py phase.
-> 2. ***python3 train.py*** and take out the checkpoint at 29,000 iteration (It will be named "Iter29000_m_......_model.pt") for later inference. Notice that there are valid accuracy information in the middle of the model name. Hence you need to make sure the name before you move this checkpoint to the inference folder.
-> 3. ***python3 train_2.py*** and take out the checkpoint at 31,500 iteration (It will be named "Iter31500_model.pt") for later inference.
+> 1. ***python3 pretrain.py*** and take out the checkpoint with best valid accuracy after the whole pretrain phase finished(It will be named as "model_best.pt") for later train.py phase.
+> 2. ***python3 train.py*** and take out the checkpoint at 29,000 iteration (It will be named as "Iter29000_m_......_model.pt") for later inference. Notice that there are valid accuracy information in the middle of the model name. Hence you need to make sure the name before you move this checkpoint to the inference folder.
+> 3. ***python3 train_2.py*** and take out the checkpoint at 31,500 iteration (It will be named as "Iter31500_model.pt") for later inference.
 
-*pretrain.py* and *train.py* are used to generate the first checkpoint, which requires a two-phase training technique; whereas for the second checkpoint, you simply have to execute *train_2.py*.
+For the first checkpoint, you have to execute *pretrain.py* and then *train.py* which is a two-phase training technique.
+For the second checkpoint, you simply have to execute *train_2.py*.
 
 ### Inference
 If you want to use our trained checkpoints to do inference, you have to use the following command to obtain them before doing inference:
 
     bash ./download_checkpoints.sh
-And our trained checkpoints will be donwloaded to the current directory. **You would possibly want to create a new directory and move the downloaded checkpoints into it manually for later inferencing**
+And our trained checkpoints will be donwloaded to the current directory. **You would possibly need to create a new directory and move the downloaded checkpoints into it manually for later inferencing**
 
 Otherwise, after you start training, you could find the saved checkpoints inside "./checkpoints/" for the first to-be-used-in-inference checkpoint & "./checkpoints_2/" for the second one.
 > 1. ***python3 inference.py $1 $2 $3***
