@@ -25,11 +25,11 @@ And our trained checkpoints will be donwloaded to the current directory. **You w
 Otherwise, after you start training, you could find the saved checkpoints inside "./checkpoints/" for the first to-be-used-in-inference checkpoint & "./checkpoints_2/" for the second one.
 > 1. ***python3 inference.py $1 $2 $3***
 
-$1 = the directory to the whole dataset (e.g.: ./food_data/).
+$1 = the directory to the whole dataset (e.g.: ./food_data/). **Note that this directory must be the root of the dataset like (./food_data/). Some unwanted error would be raised if the directory is (./food_data/test)!**
 
-$2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/).
+$2 = the directory to the four (main/freq/comm/rare) output csv-files (e.g.: ./output_submissions/). **Note that this directory must be the folder of the dataset like (./output_submissions/). Some unwanted error would be raised if the directory is (./food_data/submit.csv)! The directory must be created in advance otherwise the unwanted error would be raised.**
 
-$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files, or some unwanted error could possibly be raised!**
+$3 = the directory to the to-be-used checkpoints for inferencing (e.g.: ./checkpoints/). **Note that this directory must only contains the checkpoint files needed only in inference phase, or some unwanted error could possibly be raised! Hence you need to delete unwanted checkpoints created by train.py and then move the wanted checkpoints manually. We do not provide the code to move the checkpoints you want.**
 
 ### Be aware
 + You have to create and deal with the directories all mentioned above (e.g., mkdir ./checkpoints & manually move the checkpoints into this newly-created directory) as if they don't exist before doing anything!
